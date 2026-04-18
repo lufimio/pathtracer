@@ -1,6 +1,11 @@
 pub mod sphere;
 
-use crate::geometry::{Interval, Point3, Ray, Vec3};
+use enum_dispatch::enum_dispatch;
+
+use crate::{
+    geometry::{Interval, Point3, Ray, Vec3},
+    hittable::sphere::Sphere,
+};
 
 #[derive(Debug, Clone, Copy)]
 pub struct HitRecord {
@@ -30,12 +35,18 @@ impl HitRecord {
     }
 }
 
+#[enum_dispatch]
 pub trait Hittable {
     fn hit(&self, r: Ray, t_interval: Interval) -> Option<HitRecord>;
 }
 
+#[enum_dispatch(Hittable)]
+pub enum Object {
+    Sphere,
+}
+
 pub struct World {
-    pub objects: Vec<Box<dyn Hittable>>,
+    pub objects: Vec<Object>,
 }
 
 impl World {
@@ -45,21 +56,15 @@ impl World {
         }
     }
 
-    pub fn new(objects: Vec<Box<dyn Hittable>>) -> Self {
-        Self { objects }
-    }
-
     pub fn clear(&mut self) {
         self.objects.clear()
     }
 
-    pub fn add<T: Hittable + 'static>(&mut self, object: T) {
-        self.objects.push(Box::new(object));
+    pub fn add<T: Into<Object>>(&mut self, object: T) {
+        self.objects.push(object.into());
     }
-}
 
-impl Hittable for World {
-    fn hit(&self, r: Ray, t_interval: Interval) -> Option<HitRecord> {
+    pub fn hit(&self, r: Ray, t_interval: Interval) -> Option<HitRecord> {
         let mut closest: Option<HitRecord> = None;
 
         for obj in &self.objects {

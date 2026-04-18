@@ -45,6 +45,10 @@ impl Interval {
         let x = x.into();
         self.min < x && x < self.max
     }
+
+    pub fn clamp(self, x: f64) -> f64 {
+        x.clamp(self.min, self.max)
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
