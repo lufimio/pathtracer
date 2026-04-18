@@ -1,3 +1,4 @@
+use image::{ImageResult, Rgb, RgbImage};
 use indicatif::ProgressBar;
 
 use crate::{
@@ -50,10 +51,9 @@ impl Camera {
         }
     }
 
-    pub fn render(&self, world: &World) {
-        print!("P3\n{} {}\n255\n", self.image_width, self.image_height);
-
+    pub fn render(&self, world: &World, output_path: &str) {
         let bar = ProgressBar::new((self.image_height * self.image_width * self.samples_per_pixel) as u64);
+        let mut img = RgbImage::new(self.image_width, self.image_height);
         for j in 0..self.image_height {
             for i in 0..self.image_width {
                 let mut pixel_color = Color::zero();
@@ -62,9 +62,15 @@ impl Camera {
                     pixel_color = pixel_color + self.get_ray_color(r, self.max_depth, &world);
                     bar.inc(1);
                 }
-                (pixel_color / self.samples_per_pixel as f64).write_ppm();
+                pixel_color = pixel_color / self.samples_per_pixel as f64;
+                img.put_pixel(i, j, pixel_color.to_rgb());
             }
         }
+
+        if let ImageResult::Err(error) = img.save(output_path) {
+            eprintln!("Error writing image: {}", error)
+        }
+
         bar.finish();
     }
 

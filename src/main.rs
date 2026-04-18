@@ -42,5 +42,5 @@ fn main() {
     ));
 
     let camera = Camera::new(16. / 9., 400, 100, 50);
-    camera.render(&world);
+    camera.render(&world, "output/render.png");
 }

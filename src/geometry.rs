@@ -4,6 +4,7 @@ use std::{
     ops::{Add, Div, Index, Mul, Neg, Sub},
 };
 
+use image::Rgb;
 use rand::{random, random_range};
 
 pub fn sample_square() -> Vec3 {
@@ -185,7 +186,10 @@ impl Mul for Vec3 {
     }
 }
 
-impl<T> Mul<T> for Vec3 where T: Into<f64> {
+impl<T> Mul<T> for Vec3
+where
+    T: Into<f64>,
+{
     type Output = Vec3;
 
     fn mul(self, other: T) -> Self::Output {
@@ -210,7 +214,10 @@ impl Mul<Vec3> for f64 {
     }
 }
 
-impl<T> Div<T> for Vec3 where T: Into<f64> {
+impl<T> Div<T> for Vec3
+where
+    T: Into<f64>,
+{
     type Output = Vec3;
 
     fn div(self, other: T) -> Self::Output {
@@ -247,18 +254,17 @@ pub type Point3 = Vec3;
 pub type Color = Vec3;
 
 impl Color {
-    pub fn write_ppm(self) {
+    pub fn to_rgb(self) -> Rgb<u8> {
         let r = linear_to_gamma(self.x);
         let g = linear_to_gamma(self.y);
         let b = linear_to_gamma(self.z);
 
         let intensity = Interval::new(0, 0.999);
-        println!(
-            "{} {} {}",
+        Rgb([
             (256. * intensity.clamp(r)) as u8,
             (256. * intensity.clamp(g)) as u8,
             (256. * intensity.clamp(b)) as u8,
-        );
+        ])
     }
 }
 
