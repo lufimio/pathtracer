@@ -1,7 +1,51 @@
 use std::{
+    f64,
     fmt::Display,
     ops::{Add, Div, Index, Mul, Neg, Sub},
 };
+
+#[derive(Debug, Clone, Copy)]
+pub struct Interval {
+    pub min: f64,
+    pub max: f64,
+}
+
+impl Interval {
+    pub fn new<S: Into<f64>, B: Into<f64>>(min: S, max: B) -> Self {
+        Self {
+            min: min.into(),
+            max: max.into(),
+        }
+    }
+
+    pub fn empty() -> Self {
+        Self {
+            min: f64::INFINITY,
+            max: f64::NEG_INFINITY,
+        }
+    }
+
+    pub fn all() -> Self {
+        Self {
+            min: f64::NEG_INFINITY,
+            max: f64::INFINITY,
+        }
+    }
+
+    pub fn size(self) -> f64 {
+        self.max - self.min
+    }
+
+    pub fn contains<T: Into<f64>>(self, x: T) -> bool {
+        let x = x.into();
+        self.min <= x && x <= self.max
+    }
+
+    pub fn surrounds<T: Into<f64>>(self, x: T) -> bool {
+        let x = x.into();
+        self.min < x && x < self.max
+    }
+}
 
 #[derive(Debug, Clone, Copy)]
 pub struct Vec3 {
@@ -140,11 +184,16 @@ pub type Color = Vec3;
 
 impl Color {
     pub fn write_ppm(self) {
-        println!("{} {} {}", (self.x * 255.999) as u8, (self.y * 255.999) as u8, (self.z * 255.999) as u8);
+        println!(
+            "{} {} {}",
+            (self.x * 255.999) as u8,
+            (self.y * 255.999) as u8,
+            (self.z * 255.999) as u8
+        );
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Ray {
     pub origin: Point3,
     pub direction: Vec3,
