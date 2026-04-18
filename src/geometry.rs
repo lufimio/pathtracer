@@ -4,6 +4,10 @@ use std::{
     ops::{Add, Div, Index, Mul, Neg, Sub},
 };
 
+pub fn sample_square() -> Vec3 {
+    Vec3::new(rand::random::<f64>() - 0.5, rand::random::<f64>() - 0.5, 0)
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct Interval {
     pub min: f64,
@@ -188,11 +192,12 @@ pub type Color = Vec3;
 
 impl Color {
     pub fn write_ppm(self) {
+        let intensity = Interval::new(0, 0.999);
         println!(
             "{} {} {}",
-            (self.x * 255.999) as u8,
-            (self.y * 255.999) as u8,
-            (self.z * 255.999) as u8
+            (256. * intensity.clamp(self.x)) as u8,
+            (256. * intensity.clamp(self.y)) as u8,
+            (256. * intensity.clamp(self.z)) as u8,
         );
     }
 }

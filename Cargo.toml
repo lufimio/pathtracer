@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 enum_dispatch = "0.3.13"
 indicatif = { version = "0.18.4", features = ["improved_unicode"] }
+rand = "0.10.1"

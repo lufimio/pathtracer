@@ -1,7 +1,7 @@
 use indicatif::ProgressBar;
 
 use crate::{
-    geometry::{Color, Interval, Point3, Ray, Vec3},
+    geometry::{Color, Interval, Point3, Ray, Vec3, sample_square},
     hittable::World,
 };
 
@@ -10,13 +10,14 @@ pub struct Camera {
     pub image_width: u32,
     pub image_height: u32,
     pub center: Point3,
+    pub samples_per_pixel: u32,
     pixel00_loc: Point3,
     pixel_delta_u: Point3,
     pixel_delta_v: Point3,
 }
 
 impl Camera {
-    pub fn new(aspect_ratio: f64, image_width: u32) -> Self {
+    pub fn new(aspect_ratio: f64, image_width: u32, samples_per_pixel: u32) -> Self {
         let image_height = (image_width as f64 / aspect_ratio) as u32;
         let img_height = if image_height < 1 { 1 } else { image_height };
 
@@ -40,6 +41,7 @@ impl Camera {
             image_width,
             image_height,
             center,
+            samples_per_pixel,
             pixel00_loc,
             pixel_delta_u,
             pixel_delta_v,
@@ -49,19 +51,28 @@ impl Camera {
     pub fn render(&self, world: &World) {
         print!("P3\n{} {}\n255\n", self.image_width, self.image_height);
 
-        let bar = ProgressBar::new((self.image_height * self.image_width) as u64);
+        let bar = ProgressBar::new((self.image_height * self.image_width * self.samples_per_pixel) as u64);
         for j in 0..self.image_height {
             for i in 0..self.image_width {
-                let pixel_center = self.pixel00_loc
-                    + (i as f64 * self.pixel_delta_u)
-                    + (j as f64 * self.pixel_delta_v);
-                let ray_direction = pixel_center - self.center;
-                self.get_ray_color(Ray::new(self.center, ray_direction), &world)
-                    .write_ppm();
-                bar.tick();
+                let mut pixel_color = Color::zero();
+                for _sample in 0..self.samples_per_pixel {
+                    let r = self.get_ray(i, j);
+                    pixel_color = pixel_color + self.get_ray_color(r, &world);
+                    bar.inc(1);
+                }
+                (pixel_color / self.samples_per_pixel as f64).write_ppm();
             }
         }
         bar.finish();
+    }
+
+    pub fn get_ray(&self, i: u32, j: u32) -> Ray {
+        let offset = sample_square();
+        let pixel_center = self.pixel00_loc
+            + ((i as f64 + offset.x) * self.pixel_delta_u)
+            + ((j as f64 + offset.y) * self.pixel_delta_v);
+
+        Ray::new(self.center, pixel_center - self.center)
     }
 
     pub fn get_ray_color(&self, r: Ray, world: &World) -> Color {
