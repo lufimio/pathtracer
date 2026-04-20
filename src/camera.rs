@@ -115,7 +115,7 @@ impl Camera {
     }
 
     fn get_ray(&self, i: u32, j: u32) -> Ray {
-        let offset = sample_square();
+        let offset = 0.5 * random_in_unit_disk();
         let pixel_center = self.pixel00_loc
             + ((i as f64 + offset.x) * self.pixel_delta_u)
             + ((j as f64 + offset.y) * self.pixel_delta_v);

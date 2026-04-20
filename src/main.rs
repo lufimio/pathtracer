@@ -14,9 +14,7 @@ use crate::{
     material::{Material, dielectric::Dielectric, lambertian::Lambertian, metal::Metal},
 };
 
-fn main() {
-    let mut world = World::empty();
-
+fn setup_scattered_balls(world: &mut World) {
     let ground_material = Rc::new(Lambertian::new(Color::new(0.5, 0.5, 0.5)).into());
     world.add(Sphere::new(
         Point3::new(0, -1000, 0),
@@ -51,38 +49,51 @@ fn main() {
     }
     */
 
-    let material1 = Rc::new(Dielectric::new(1.5).into());
+    let material1 = Rc::new(Dielectric::new(1.0).into());
     world.add(Sphere::new(
         Point3::new(0, 1, 0),
         1.0,
         Rc::clone(&material1),
     ));
 
-    let material2 = Rc::new(Lambertian::new(Color::new(0.4, 0.2, 0.1)).into());
+    let material2 = Rc::new(Dielectric::new(1.0 / 1.5).into());
     world.add(Sphere::new(
-        Point3::new(-4, 1, 0),
-        1.0,
+        Point3::new(0, 1, 0),
+        0.9,
         Rc::clone(&material2),
     ));
 
-    let material3 = Rc::new(Metal::new(Color::new(0.7, 0.6, 0.5), 0.1).into());
+    let material3 = Rc::new(Lambertian::new(Color::new(0.4, 0.2, 0.1)).into());
     world.add(Sphere::new(
-        Point3::new(4, 1, 0),
+        Point3::new(-4, 1, 0),
         1.0,
         Rc::clone(&material3),
     ));
 
+    let material4 = Rc::new(Metal::new(Color::new(0.7, 0.6, 0.5), 0.1).into());
+    world.add(Sphere::new(
+        Point3::new(4, 1, 0),
+        1.0,
+        Rc::clone(&material4),
+    ));
+}
+
+fn main() {
+    let mut world = World::empty();
+
+    setup_scattered_balls(&mut world);
+
     let camera = Camera::new(
-        16. / 9.,               // aspect ratio
-        400,                    // image width
-        10,                     // samples per pixel
-        50,                     // max depth
-        20,                     // fov
-        Point3::new(18, 4, 8), // look at
-        Point3::new(0, 0, 0),   // look from
-        Vec3::new(0, 1, 0),     // camera up
-        0,                      // defocus angle
-        10,                     // focus distance
+        16. / 9.,              // aspect ratio
+        400,                   // image width
+        10,                    // samples per pixel
+        50,                    // max depth
+        20,                    // fov
+        Point3::new(13, 4, 8), // look at
+        Point3::new(0, 0, 0),  // look from
+        Vec3::new(0, 1, 0),    // camera up
+        0,                     // defocus angle
+        10,                    // focus distance
     );
 
     camera.render(&world, "output/render.png");
