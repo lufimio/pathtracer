@@ -1,6 +1,6 @@
 pub mod sphere;
 
-use std::rc::Rc;
+use std::{rc::Rc, sync::Arc};
 
 use enum_dispatch::enum_dispatch;
 
@@ -14,13 +14,13 @@ use crate::{
 pub struct HitRecord {
     pub p: Point3,
     pub normal: Vec3,
-    pub mat: Rc<Material>,
+    pub mat: Arc<Material>,
     pub t: f64,
     pub front_face: bool,
 }
 
 impl HitRecord {
-    pub fn new(p: Point3, mat: Rc<Material>, t: f64) -> Self {
+    pub fn new(p: Point3, mat: Arc<Material>, t: f64) -> Self {
         Self {
             p,
             normal: Vec3::zero(),

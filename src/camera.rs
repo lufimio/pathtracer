@@ -1,4 +1,4 @@
-use image::{ImageResult, Rgb, RgbImage};
+use image::{DynamicImage, ImageBuffer, ImageResult, Rgb, RgbImage};
 use indicatif::{ProgressBar, ProgressStyle};
 
 use crate::{
@@ -100,25 +100,27 @@ impl Camera {
             .unwrap(),
         );
 
-        let mut img = RgbImage::new(self.image_width, self.image_height);
-        for j in 0..self.image_height {
-            for i in 0..self.image_width {
-                let mut pixel_color = Color::zero();
-                for _sample in 0..self.samples_per_pixel {
-                    let r = self.get_ray(i, j);
-                    pixel_color = pixel_color + self.get_ray_color(r, self.max_depth, &world);
-                    bar.inc(1);
-                }
-                pixel_color = pixel_color / self.samples_per_pixel as f64;
-                img.put_pixel(i, j, pixel_color.to_rgb());
-            }
-        }
-
+        let img = DynamicImage::from(ImageBuffer::from_par_fn(
+            self.image_width,
+            self.image_height,
+            |x: u32, y: u32| -> Rgb<u8> { self.sample_pixel(&world, &bar, x, y) },
+        ));
         if let ImageResult::Err(error) = img.save(output_path) {
             eprintln!("Error writing image: {}", error)
         }
 
         bar.finish();
+    }
+
+    fn sample_pixel(&self, world: &World, bar: &ProgressBar, x: u32, y: u32) -> Rgb<u8> {
+        let mut pixel_color = Color::zero();
+        for _sample in 0..self.samples_per_pixel {
+            let r = self.get_ray(x, y);
+            pixel_color = pixel_color + self.get_ray_color(r, self.max_depth, &world);
+            bar.inc(1);
+        }
+        pixel_color = pixel_color / self.samples_per_pixel as f64;
+        pixel_color.to_rgb()
     }
 
     fn get_ray(&self, i: u32, j: u32) -> Ray {
