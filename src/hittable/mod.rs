@@ -71,19 +71,17 @@ impl World {
 
     pub fn hit(&self, r: Ray, t_interval: Interval) -> Option<HitRecord> {
         let mut closest: Option<HitRecord> = None;
+        let mut closest_dist = t_interval.max;
 
         for obj in &self.objects {
             if let Some(rec) = obj.hit(
                 r,
                 Interval::new(
                     t_interval.min,
-                    if let Some(ref c) = closest {
-                        c.t
-                    } else {
-                        t_interval.max
-                    },
+                    closest_dist
                 ),
             ) {
+                closest_dist = rec.t;
                 closest = Some(rec);
             }
         }

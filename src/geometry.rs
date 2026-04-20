@@ -15,6 +15,11 @@ pub fn linear_to_gamma(linear: f64) -> f64 {
     if linear > 0.0 { linear.sqrt() } else { 0.0 }
 }
 
+pub fn random_in_unit_disk() -> Vec3 {
+    let a = random_range(0.0..f64::consts::FRAC_2_PI);
+    Vec3::new(a.cos(), a.sin(), 0)
+}
+
 pub fn random_unit_vector() -> Vec3 {
     let y: f64 = random_range(-1.0..1.0);
     let r: f64 = (1. - y * y).sqrt();
@@ -94,6 +99,10 @@ impl Vec3 {
         Self::new(0, 0, 0)
     }
 
+    pub fn one() -> Self {
+        Self::new(1, 1, 1)
+    }
+
     pub fn random() -> Self {
         Self {
             x: random(),
@@ -137,10 +146,6 @@ impl Vec3 {
     pub fn near_zero(self) -> bool {
         let s = 1e-8;
         self.x.abs() < s && self.y.abs() < s && self.z.abs() < s
-    }
-
-    pub fn reflect(self, normal: Vec3) -> Vec3 {
-        self - 2.0 * self.dot(normal) * normal
     }
 }
 

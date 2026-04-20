@@ -1,7 +1,7 @@
 use crate::{
     geometry::{Color, Ray, random_unit_vector},
     hittable::HitRecord,
-    material::Scatterable,
+    material::{Scatterable, dielectric::reflect},
 };
 
 #[derive(Debug, Clone, Copy)]
@@ -21,7 +21,7 @@ impl Metal {
 
 impl Scatterable for Metal {
     fn scatter(&self, r: Ray, rec: &HitRecord) -> Option<(Ray, Color)> {
-        let reflected = r.direction.reflect(rec.normal);
+        let reflected = reflect(r.direction, rec.normal);
         let reflected = reflected.normalized() + self.fuzz * random_unit_vector();
         let scattered = Ray::new(rec.p, reflected);
 
