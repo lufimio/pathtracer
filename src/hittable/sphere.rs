@@ -1,8 +1,8 @@
-use std::{rc::Rc, sync::Arc};
+use std::sync::Arc;
 
 use crate::{
-    geometry::{Interval, Point3, Ray},
-    hittable::{HitRecord, Hittable},
+    geometry::{Interval, Point3, Ray, Vec3},
+    hittable::{HitRecord, Hittable, bvh::AABB},
     material::Material,
 };
 
@@ -11,6 +11,7 @@ pub struct Sphere {
     center: Point3,
     radius: f64,
     mat: Arc<Material>,
+    bbox: AABB,
 }
 
 impl Hittable for Sphere {
@@ -40,14 +41,20 @@ impl Hittable for Sphere {
 
         Option::Some(rec)
     }
+
+    fn bounding_box(&self) -> AABB {
+        self.bbox
+    }
 }
 
 impl Sphere {
     pub fn new<T: Into<f64>>(center: Point3, radius: T, mat: Arc<Material>) -> Self {
+        let radius = radius.into().max(0.0);
         Self {
             center,
-            radius: radius.into().max(0.0),
+            radius,
             mat,
+            bbox: AABB::from_extrema(center - Vec3::one() * radius, center + Vec3::one() * radius),
         }
     }
 }

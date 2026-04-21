@@ -1,12 +1,13 @@
+pub mod bvh;
 pub mod sphere;
 
-use std::{rc::Rc, sync::Arc};
+use std::sync::Arc;
 
 use enum_dispatch::enum_dispatch;
 
 use crate::{
     geometry::{Interval, Point3, Ray, Vec3},
-    hittable::sphere::Sphere,
+    hittable::{bvh::{AABB, BVHNode}, sphere::Sphere},
     material::Material,
 };
 
@@ -43,33 +44,45 @@ impl HitRecord {
 #[enum_dispatch]
 pub trait Hittable {
     fn hit(&self, r: Ray, t_interval: Interval) -> Option<HitRecord>;
+    fn bounding_box(&self) -> AABB;
 }
 
 #[enum_dispatch(Hittable)]
+#[derive(Debug)]
 pub enum Object {
     Sphere,
+    HittableList,
+    BVHNode,
 }
 
-pub struct World {
+#[derive(Debug)]
+pub struct HittableList {
     pub objects: Vec<Object>,
+    bbox: AABB,
 }
 
-impl World {
+impl HittableList {
     pub fn empty() -> Self {
         Self {
             objects: Vec::new(),
+            bbox: AABB::new(Interval::empty(), Interval::empty(), Interval::empty()),
         }
     }
 
     pub fn clear(&mut self) {
-        self.objects.clear()
+        self.objects.clear();
+        self.bbox = AABB::new(Interval::empty(), Interval::empty(), Interval::empty());
     }
 
     pub fn add<T: Into<Object>>(&mut self, object: T) {
-        self.objects.push(object.into());
+        let object = object.into();
+        self.bbox = AABB::containing(self.bbox, object.bounding_box());
+        self.objects.push(object);
     }
+}
 
-    pub fn hit(&self, r: Ray, t_interval: Interval) -> Option<HitRecord> {
+impl Hittable for HittableList {
+    fn hit(&self, r: Ray, t_interval: Interval) -> Option<HitRecord> {
         let mut closest: Option<HitRecord> = None;
         let mut closest_dist = t_interval.max;
 
@@ -81,5 +94,9 @@ impl World {
         }
 
         closest
+    }
+
+    fn bounding_box(&self) -> AABB {
+        self.bbox
     }
 }

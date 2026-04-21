@@ -60,6 +60,14 @@ impl Interval {
         }
     }
 
+    pub fn containing(a: Interval, b: Interval) -> Interval {
+        Interval::new(f64::min(a.min, b.min), f64::max(a.max, b.max))
+    }
+
+    pub fn expand(self, delta: f64) -> Interval {
+        Interval::new(self.min - delta / 2., self.max + delta / 2.)
+    }
+
     pub fn size(self) -> f64 {
         self.max - self.min
     }

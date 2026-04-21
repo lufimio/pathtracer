@@ -10,11 +10,13 @@ use rand::{random, random_range};
 use crate::{
     camera::Camera,
     geometry::{Color, Point3, Vec3},
-    hittable::{sphere::Sphere, World},
-    material::{dielectric::Dielectric, lambertian::Lambertian, metal::Metal, Material},
+    hittable::{sphere::Sphere, HittableList},
+    material::{dielectric::Dielectric, lambertian::Lambertian, metal::Metal},
 };
 
-fn setup_scattered_balls(world: &mut World) {
+fn setup_scattered_balls() {
+    let mut world = HittableList::empty();
+
     let ground_material = Arc::new(Lambertian::new(Color::new(0.5, 0.5, 0.5)).into());
     world.add(Sphere::new(
         Point3::new(0, -1000, 0),
@@ -57,7 +59,7 @@ fn setup_scattered_balls(world: &mut World) {
     // let material2 = Arc::new(Dielectric::new(1.0 / 1.5).into());
     // world.add(Sphere::new(
     //     Point3::new(0, 1, 0),
-    //     0.9,
+    //     0.8,
     //     Arc::clone(&material2),
     // ));
 
@@ -74,12 +76,6 @@ fn setup_scattered_balls(world: &mut World) {
         1.0,
         Arc::clone(&material4),
     ));
-}
-
-fn main() {
-    let mut world = World::empty();
-
-    setup_scattered_balls(&mut world);
 
     let camera = Camera::new(
         16. / 9.,              // aspect ratio
@@ -87,12 +83,19 @@ fn main() {
         50,                    // samples per pixel
         50,                    // max depth
         20,                    // fov
-        Point3::new(13, 2, 3), // look at
-        Point3::new(0, 0, 0),  // look from
+        Point3::new(13, 2, 3), // look from
+        Point3::new(0, 0, 0),  // look at
         Vec3::new(0, 1, 0),    // camera up
         0.6,                   // defocus angle
         10,                    // focus distance
     );
 
     camera.render(&world, "output/render.png");
+}
+
+fn main() {
+    match 1 {
+        1 => setup_scattered_balls(),
+        _ => ()
+    }
 }

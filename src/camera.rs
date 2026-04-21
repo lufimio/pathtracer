@@ -1,12 +1,11 @@
-use image::{DynamicImage, ImageBuffer, ImageResult, Rgb, RgbImage};
+use image::{DynamicImage, ImageBuffer, ImageResult, Rgb};
 use indicatif::{ProgressBar, ProgressStyle};
 
 use crate::{
     geometry::{
-        Color, Interval, Point3, Ray, Vec3, random_in_unit_disk, random_on_hemisphere,
-        sample_square,
+        Color, Interval, Point3, Ray, Vec3, random_in_unit_disk,
     },
-    hittable::World,
+    hittable::{Hittable, HittableList},
     material::Scatterable,
 };
 
@@ -89,7 +88,7 @@ impl Camera {
         }
     }
 
-    pub fn render(&self, world: &World, output_path: &str) {
+    pub fn render(&self, world: &HittableList, output_path: &str) {
         let bar = ProgressBar::new(
             (self.image_height * self.image_width * self.samples_per_pixel) as u64,
         )
@@ -112,7 +111,7 @@ impl Camera {
         bar.finish();
     }
 
-    fn sample_pixel(&self, world: &World, bar: &ProgressBar, x: u32, y: u32) -> Rgb<u8> {
+    fn sample_pixel(&self, world: &HittableList, bar: &ProgressBar, x: u32, y: u32) -> Rgb<u8> {
         let mut pixel_color = Color::zero();
         for _sample in 0..self.samples_per_pixel {
             let r = self.get_ray(x, y);
@@ -144,7 +143,7 @@ impl Camera {
         self.lookfrom + p.x * self.defocus_disk_u + p.y * self.defocus_disk_v
     }
 
-    fn get_ray_color(&self, r: Ray, depth: u32, world: &World) -> Color {
+    fn get_ray_color(&self, r: Ray, depth: u32, world: &HittableList) -> Color {
         if depth <= 0 {
             return Color::zero();
         }
