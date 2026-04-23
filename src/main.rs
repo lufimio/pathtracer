@@ -3,14 +3,14 @@ mod geometry;
 mod hittable;
 mod material;
 
-use std::{f32, sync::Arc};
-use rand::{random, random_range};
 use crate::{
     camera::Camera,
     geometry::{Color, Point3, Vec3},
-    hittable::{HittableList, bvh::BVHNode, sphere::Sphere},
+    hittable::{HittableList, bvh::BVHNode, quad::Quad, sphere::Sphere},
     material::{dielectric::Dielectric, lambertian::Lambertian, metal::Metal},
 };
+use rand::{random, random_range};
+use std::{f32, sync::Arc};
 
 fn setup_scattered_balls() {
     let mut world = HittableList::empty();
@@ -93,9 +93,69 @@ fn setup_scattered_balls() {
     camera.render(&world, "output/render.png");
 }
 
+fn setup_quads() {
+    let mut world = HittableList::empty();
+
+    let left_red = Arc::new(Lambertian::new(Color::new(1.0, 0.2, 0.2)).into());
+    world.add(Quad::new(
+        Point3::new(-3., -2., 5.),
+        Vec3::new(0., 0., -4.),
+        Vec3::new(0., 4., 0.),
+        Arc::clone(&left_red),
+    ));
+
+    let back_green = Arc::new(Lambertian::new(Color::new(0.2, 1.0, 0.2)).into());
+    world.add(Quad::new(
+        Point3::new(-2., -2., 0.),
+        Vec3::new(4., 0., 0.),
+        Vec3::new(0., 4., 0.),
+        Arc::clone(&back_green),
+    ));
+
+    let right_blue = Arc::new(Lambertian::new(Color::new(0.2, 0.2, 1.0)).into());
+    world.add(Quad::new(
+        Point3::new(3., -2., 1.),
+        Vec3::new(0., 0., 4.),
+        Vec3::new(0., 4., 0.),
+        Arc::clone(&right_blue),
+    ));
+
+    let upper_orange = Arc::new(Lambertian::new(Color::new(1.0, 0.5, 0.0)).into());
+    world.add(Quad::new(
+        Point3::new(-2., 3., 1.),
+        Vec3::new(4., 0., 0.),
+        Vec3::new(0., 0., 4.),
+        Arc::clone(&upper_orange),
+    ));
+
+    let lower_teal = Arc::new(Lambertian::new(Color::new(0.2, 0.8, 0.8)).into());
+    world.add(Quad::new(
+        Point3::new(-2., -3., 5.),
+        Vec3::new(4., 0., 0.),
+        Vec3::new(0., 0., -4.),
+        Arc::clone(&lower_teal),
+    ));
+
+    let camera = Camera::new(
+        1.0,                 // aspect ratio
+        400,                      // image width
+        100,                       // samples per pixel
+        50,                       // max depth
+        80.0,                     // fov
+        Point3::new(0., 0., 9.), // look from
+        Point3::new(0., 0., 0.),  // look at
+        Vec3::new(0., 1., 0.),    // camera up
+        0.0,                      // defocus angle
+        10.0,                     // focus distance
+    );
+
+    camera.render(&world, "output/render.png");
+}
+
 fn main() {
-    match 1 {
+    match 2 {
         1 => setup_scattered_balls(),
-        _ => ()
+        2 => setup_quads(),
+        _ => (),
     }
 }

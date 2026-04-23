@@ -1,8 +1,8 @@
-use std::sync::Arc;
 use crate::{
     geometry::{Interval, Point3, Ray},
     hittable::{HitRecord, Hittable, HittableList, Object},
 };
+use std::sync::Arc;
 
 #[derive(Debug, Clone, Copy)]
 pub struct AABB {
@@ -13,7 +13,7 @@ pub struct AABB {
 
 impl AABB {
     pub fn new(x: Interval, y: Interval, z: Interval) -> Self {
-        Self { x, y, z }
+        Self { x, y, z }.pad_to_minimum()
     }
 
     pub fn from_extrema(a: Point3, b: Point3) -> Self {
@@ -22,6 +22,34 @@ impl AABB {
             y: Interval::new(f32::min(a.y, b.y), f32::max(a.y, b.y)),
             z: Interval::new(f32::min(a.z, b.z), f32::max(a.z, b.z)),
         }
+        .pad_to_minimum()
+    }
+
+    pub fn containing(a: AABB, b: AABB) -> AABB {
+        Self {
+            x: Interval::containing(a.x, b.x),
+            y: Interval::containing(a.y, b.y),
+            z: Interval::containing(a.z, b.z),
+        }
+        .pad_to_minimum()
+    }
+
+    fn pad_to_minimum(self) -> Self {
+        let delta = 0.0001;
+
+        let x = (self.x.size() < delta)
+            .then(|| self.x.expand(delta))
+            .unwrap_or(self.x);
+
+        let y = (self.y.size() < delta)
+            .then(|| self.y.expand(delta))
+            .unwrap_or(self.y);
+
+        let z = (self.z.size() < delta)
+            .then(|| self.z.expand(delta))
+            .unwrap_or(self.z);
+
+        Self { x, y, z }
     }
 
     pub fn empty() -> Self {
@@ -30,14 +58,6 @@ impl AABB {
 
     pub fn all() -> Self {
         Self::new(Interval::all(), Interval::all(), Interval::all())
-    }
-
-    pub fn containing(a: AABB, b: AABB) -> AABB {
-        Self::new(
-            Interval::containing(a.x, b.x),
-            Interval::containing(a.y, b.y),
-            Interval::containing(a.z, b.z),
-        )
     }
 
     pub fn axis_interval(self, n: usize) -> Interval {

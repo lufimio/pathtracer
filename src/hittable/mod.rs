@@ -1,11 +1,12 @@
 pub mod bvh;
 pub mod sphere;
+pub mod quad;
 
 use std::sync::Arc;
 use enum_dispatch::enum_dispatch;
 use crate::{
     geometry::{Interval, Point3, Ray, Vec3},
-    hittable::{bvh::{AABB, BVHNode}, sphere::Sphere},
+    hittable::{bvh::{AABB, BVHNode}, quad::Quad, sphere::Sphere},
     material::Material,
 };
 
@@ -49,6 +50,7 @@ pub trait Hittable {
 #[derive(Debug)]
 pub enum Object {
     Sphere,
+    Quad,
     HittableList,
     BVHNode,
 }
