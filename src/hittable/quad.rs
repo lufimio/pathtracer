@@ -4,7 +4,7 @@ use glam::Vec3;
 
 use crate::{
     geometry::{Interval, Point3, Ray},
-    hittable::{HitRecord, Hittable, bvh::AABB},
+    hittable::{HitRecord, Hittable, HittableList, bvh::AABB},
     material::Material,
 };
 
@@ -66,6 +66,7 @@ impl Hittable for Quad {
         }
 
         let mut rec = HitRecord::new(intersection, Arc::clone(&self.mat), t);
+        rec.set_uv_coords(alpha, beta);
         rec.set_face_normal(r, self.normal);
         Some(rec)
     }
@@ -73,4 +74,24 @@ impl Hittable for Quad {
     fn bounding_box(&self) -> AABB {
         self.bbox
     }
+}
+
+pub fn make_box(a: Point3, b: Point3, mat: Arc<Material>) -> HittableList {
+    let mut sides = HittableList::empty();
+
+    let min = Point3::new(a.x.min(b.x), a.y.min(b.y), a.z.min(b.z));
+    let max = Point3::new(a.x.max(b.x), a.y.max(b.y), a.z.max(b.z));
+
+    let dx = Vec3::new(max.x - min.x, 0.0, 0.0);
+    let dy = Vec3::new(0.0, max.y - min.y, 0.0);
+    let dz = Vec3::new(0.0, 0.0, max.z - min.z);
+
+    sides.add(Quad::new(Point3::new(min.x, min.y, max.z), dx, dy, Arc::clone(&mat)));
+    sides.add(Quad::new(Point3::new(max.x, min.y, max.z), -dz, dy, Arc::clone(&mat)));
+    sides.add(Quad::new(Point3::new(max.x, min.y, min.z), -dx, dy, Arc::clone(&mat)));
+    sides.add(Quad::new(Point3::new(min.x, min.y, min.z), dz, dy, Arc::clone(&mat)));
+    sides.add(Quad::new(Point3::new(min.x, max.y, max.z), dx, -dz, Arc::clone(&mat)));
+    sides.add(Quad::new(Point3::new(min.x, min.y, min.z), dx, dz, Arc::clone(&mat)));
+
+    sides
 }
