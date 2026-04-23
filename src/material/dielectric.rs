@@ -2,7 +2,7 @@ use rand::random;
 use crate::{
     geometry::{Color, Ray, Vec3},
     hittable::HitRecord,
-    material::Scatterable,
+    material::Scatter,
 };
 
 fn reflectance(cosine: f32, ri: f32) -> f32 {
@@ -22,7 +22,7 @@ impl Dielectric {
     }
 }
 
-impl Scatterable for Dielectric {
+impl Scatter for Dielectric {
     fn scatter(&self, r: Ray, rec: &HitRecord) -> Option<(Ray, Color)> {
         let ri = if rec.front_face {
             1.0 / self.refractive_index

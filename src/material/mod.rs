@@ -11,13 +11,13 @@ use crate::{
 
 
 #[enum_dispatch]
-pub trait Scatterable {
+pub trait Scatter {
     fn scatter(&self, _r: Ray, _rec: &HitRecord) -> Option<(Ray, Color)> {
         Option::None
     }
 }
 
-#[enum_dispatch(Scatterable)]
+#[enum_dispatch(Scatter)]
 #[derive(Debug)]
 pub enum Material {
     Lambertian,

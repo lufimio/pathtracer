@@ -1,7 +1,7 @@
 use crate::{
     geometry::{Color, Ray, random_unit_vector},
     hittable::HitRecord,
-    material::Scatterable,
+    material::Scatter,
 };
 
 #[derive(Debug, Clone, Copy)]
@@ -19,7 +19,7 @@ impl Metal {
     }
 }
 
-impl Scatterable for Metal {
+impl Scatter for Metal {
     fn scatter(&self, r: Ray, rec: &HitRecord) -> Option<(Ray, Color)> {
         let reflected = r.direction.reflect(rec.normal);
         let reflected = reflected.normalize() + self.fuzz * random_unit_vector();

@@ -15,8 +15,12 @@ pub fn linear_to_gamma(linear: f32) -> f32 {
     if linear > 0.0 { linear.sqrt() } else { 0.0 }
 }
 
+pub fn gamma_to_linear(gamma: f32) -> f32 {
+    gamma * gamma
+}
+
 pub fn random_in_unit_disk() -> Vec3 {
-    let a = random_range(0.0..f32::consts::FRAC_2_PI);
+    let a = random_range(0.0..(2.0 * f32::consts::PI));
     Vec3::new(a.cos(), a.sin(), 0.0)
 }
 
@@ -99,6 +103,13 @@ pub fn color_to_rgb(color: Color) -> Rgb<u8> {
         (256. * intensity.clamp(g)) as u8,
         (256. * intensity.clamp(b)) as u8,
     ])
+}
+
+pub fn rgb_to_color(rgb: Rgb<u8>) -> Color {
+    let r = gamma_to_linear(rgb[0] as f32 / 255.0);
+    let g = gamma_to_linear(rgb[1] as f32 / 255.0);
+    let b = gamma_to_linear(rgb[2] as f32 / 255.0);
+    Color::new(r, g, b)
 }
 
 #[derive(Debug, Clone, Copy)]

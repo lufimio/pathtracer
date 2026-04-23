@@ -1,14 +1,18 @@
 pub mod bvh;
-pub mod sphere;
 pub mod quad;
+pub mod sphere;
 
-use std::sync::Arc;
-use enum_dispatch::enum_dispatch;
 use crate::{
     geometry::{Interval, Point3, Ray, Vec3},
-    hittable::{bvh::{AABB, BVHNode}, quad::Quad, sphere::Sphere},
+    hittable::{
+        bvh::{AABB, BVHNode},
+        quad::Quad,
+        sphere::Sphere,
+    },
     material::Material,
 };
+use enum_dispatch::enum_dispatch;
+use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 pub struct HitRecord {
@@ -16,6 +20,8 @@ pub struct HitRecord {
     pub normal: Vec3,
     pub mat: Arc<Material>,
     pub t: f32,
+    pub u: f32,
+    pub v: f32,
     pub front_face: bool,
 }
 
@@ -26,8 +32,15 @@ impl HitRecord {
             normal: Vec3::ZERO,
             mat,
             t,
+            u: 0.0,
+            v: 0.0,
             front_face: false,
         }
+    }
+
+    pub fn set_uv_coords(&mut self, u: f32, v: f32) {
+        self.u = u;
+        self.v = v;
     }
 
     pub fn set_face_normal(&mut self, r: Ray, outward_normal: Vec3) {

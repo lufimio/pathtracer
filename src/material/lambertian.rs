@@ -1,27 +1,33 @@
+use std::sync::Arc;
+
 use crate::{
     geometry::{Color, Ray, near_zero, random_unit_vector},
     hittable::HitRecord,
-    material::Scatterable,
+    material::Scatter,
+    texture::{Sample, Texture},
 };
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Lambertian {
-    albedo: Color,
+    tex: Arc<Texture>,
 }
 
 impl Lambertian {
-    pub fn new(albedo: Color) -> Self {
-        Self { albedo }
+    pub fn new(tex: Arc<Texture>) -> Self {
+        Self { tex }
     }
 }
 
-impl Scatterable for Lambertian {
+impl Scatter for Lambertian {
     fn scatter(&self, _r: Ray, rec: &HitRecord) -> Option<(Ray, Color)> {
         let mut scatter_direction = rec.normal + random_unit_vector();
         if near_zero(scatter_direction) {
             scatter_direction = rec.normal
         }
 
-        Some((Ray::new(rec.p, scatter_direction), self.albedo))
+        Some((
+            Ray::new(rec.p, scatter_direction),
+            self.tex.sample(rec.u, rec.v, rec.p),
+        ))
     }
 }

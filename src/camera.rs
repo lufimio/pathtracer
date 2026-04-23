@@ -3,7 +3,7 @@ use indicatif::{ProgressBar, ProgressStyle};
 use crate::{
     geometry::{Color, Interval, Point3, Ray, Vec3, random_in_unit_disk, color_to_rgb},
     hittable::Hittable,
-    material::Scatterable,
+    material::Scatter,
 };
 
 pub struct Camera {

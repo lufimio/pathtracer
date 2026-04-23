@@ -1,9 +1,10 @@
-use std::sync::Arc;
 use crate::{
     geometry::{Interval, Point3, Ray, Vec3},
     hittable::{HitRecord, Hittable, bvh::AABB},
     material::Material,
 };
+use core::f32;
+use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 pub struct Sphere {
@@ -36,6 +37,9 @@ impl Hittable for Sphere {
 
         let mut rec = HitRecord::new(r.at(root), Arc::clone(&self.mat), root);
         let outward_normal = (rec.p - self.center) / self.radius;
+        let theta = f32::acos(-outward_normal.y);
+        let phi = f32::atan2(-outward_normal.z, outward_normal.x) + f32::consts::PI;
+        rec.set_uv_coords(phi / (2.0 * f32::consts::PI), theta / f32::consts::PI);
         rec.set_face_normal(r, outward_normal);
 
         Option::Some(rec)
